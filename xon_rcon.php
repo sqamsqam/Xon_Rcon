@@ -36,24 +36,20 @@ date_default_timezone_set(Config::get('timezone'));
 $rcon = new Xon_Rcon;
 
 
-print("Xonotic PHP-RCon Starting...\n");
+print("Xon_Rcon Starting...\n");
 
-
-$socket = socket_create(AF_INET, SOCK_DGRAM, SOL_UDP);
-socket_bind($socket, Config::get('ip'), Config::get('port'));
 
 while (true) {
-	socket_recvfrom($socket, $packet, 1400, 0, $from, $port);
-	$packet = substr($packet, 5);
-	print("[" . date('h:i:s') . "] From: " . $from . ":" . $port . "; Recv: " . $packet);
-	if (strpos($packet, " " . Config::get('prefix')) == true) {
-		if (strpos($packet, ": " . Config::get('prefix')) == true) {
-			$name = explode(": " . Config::get('prefix'), $packet, 2);
+	$packet = $rcon->recv_packet();
+	$packet['packet'] = substr($packet['packet'], 5);
+	print("[" . date('h:i:s') . "] From: " . $packet['from'] . ":" . $packet['port'] . "; Recv: " . $packet['packet']);
+	if (strpos($packet['packet'], " " . Config::get('prefix')) == true) {
+		if (strpos($packet['packet'], ": " . Config::get('prefix')) == true) {
+			$name = explode(": " . Config::get('prefix'), $packet['packet'], 2);
 		}
-		elseif (strpos($packet, "> " . Config::get('prefix')) == true) {
-			$name = explode(" " . Config::get('prefix'), $packet, 2);
+		elseif (strpos($packet['packet'], "> " . Config::get('prefix')) == true) {
+			$name = explode(" " . Config::get('prefix'), $packet['packet'], 2);
 		}
-		
 		foreach (explode(',', Config::get('users')) as $user) {
 			if ($user == $name[0]) {
 				$action = explode(" ", $name[1], 2);
@@ -76,9 +72,10 @@ while (true) {
 						break;
 					case "status":
 						$rcon->send_command("status");
+						// need to finish
 						break;
 					case "rcon":
-						$action[1] = trim($action[1], " \n");
+						$action[1] = trim($action[1], "\n");
 						$rcon->send_command("$action[1]");
 						break;
 				}

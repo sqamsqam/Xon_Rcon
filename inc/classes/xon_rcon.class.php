@@ -6,39 +6,77 @@ class Xon_Rcon {
 	// Last Edited: 18/07/12
 	// Description: Provides functions to send rcon messages
 	*/
+	public function recv_packet() {
+		$socket = socket_create(AF_INET, SOCK_DGRAM, SOL_UDP);
+		socket_bind($socket, Config::get('ip'), Config::get('port'));
+		utf8_decode(socket_recvfrom($socket, $packet, 1400, 0, $from, $port));
+		return array("packet" => $packet, "from" => $from, "port" => $port);
+	}
 	public function send_command($command) {
 		// Non-Flexible. takes ip and port from config
 		$socket = socket_create(AF_INET, SOCK_DGRAM, SOL_UDP);
 		$header = "\xFF\xFF\xFF\xFF";
+		$command = utf8_encode($command);
 		
-		if (Config::get('rconsecure') == 0) {
-			$rcon_command = $header . "rcon " . Config::get('rconpass') . " $command";
-			socket_sendto($socket, $rcon_command, strlen($rcon_command), 0, Config::get('rconip'), Config::get('rconport'));
+		if (Config::get('rconsecure') == 2) { // Challenge
+			$this->send($header . "getchallenge");
+			$c = $this->recv_challenge();
+			if (!defined($c)) {
+				return 0;
+			}
+			$key = hash_hmac('md4', "$c $command", Config::get('rconpass'));
+			$this->send($header . "srcon HMAC-MD4 CHALLENGE $key $c $command");
 		}
-		elseif (Config::get('rconsecure') == 1) { // Time
-			// ToDo
-		}
-		elseif (Config::get('rconsecure') == 2) { // Challenge
-			// ToDo
+		else {
+			$this->send($header . "rcon " . Config::get('rconpass') . " $command");
 		}
 		print("[" . date('h:i:s') . "] Rcon Command: $command");
 	}
-	public function send_command_flexi($command, $rconip, $rconport) {
-		// Flexible Version of the send_comand function that takes the ip and port of the server requesting the command.
+	private function send($command) {
+		$socket = socket_create(AF_INET, SOCK_DGRAM, SOL_UDP);
+		socket_sendto($socket, $command, strlen($command), 0, Config::get('rconip'), Config::get('rconport'));
+		print("[" . date('h:i:s') . "] Sent: $command");
+	}
+	private function recv_challenge() {
+		$endtime_max = microtime() + 1;
+		$endtime = $endtime_max;
+		while(($dt  = $endtime - microtime()) > 0) {
+			$packet = $this->recv_packet();
+			if (strpos($packet['packet'], "\xFF\xFF\xFF\xFF" . "challenge ") == true) {
+				$challenge = explode(' ', $packet['packet'], 2);
+				return $challenge[1];
+			}
+		}
+	}
+	
+	/*
+	public function send_command_flexi($command, $ip, $port) {
+		// Non-Flexible. takes ip and port from config
 		$socket = socket_create(AF_INET, SOCK_DGRAM, SOL_UDP);
 		$header = "\xFF\xFF\xFF\xFF";
+		$command = utf8_encode($command);
 		
-		if (Config::get('rconsecure') == 0) {
-			$rcon_command = $header . "rcon " . Config::get('rconpass') . " $command";
-			socket_sendto($socket, $rcon_command, strlen($rcon_command), 0, $rconip, $rconport);
+		if (Config::get('rconsecure') < 1) {
+			$this->send_flexi($header . "rcon " . Config::get('rconpass') . " $command", $ip, $port);
 		}
 		elseif (Config::get('rconsecure') == 1) { // Time
-			// ToDo
+			$t = sprintf("%d.%06d",time(), rand(0,1000000));
+			$key = hash_hmac('md4', "$t $command", Config::get('rconpass'));
+			$this->send_flexi($header . "srcon HMAC-MD4 TIME $key $t $command", $ip, $port);
 		}
 		elseif (Config::get('rconsecure') == 2) { // Challenge
-			// ToDo
+			$this->send_flexi($header . "getchallenge", $ip, $port);
+			$c = $this->recv_challenge();
+			$key = hash_hmac('md4', "$c $command", Config::get('rconpass'));
+			$this->send_flexi($header . "srcon HMAC-MD4 CHALLENGE $key $c $command", $ip, $port);
 		}
 		print("[" . date('h:i:s') . "] Rcon Command: $command");
 	}
+	public function send_flexi($command, $ip, $port) {
+		$socket = socket_create(AF_INET, SOCK_DGRAM, SOL_UDP);
+		socket_sendto($socket, $command, strlen($command), 0, $ip, $port);
+		print("[" . date('h:i:s') . "] Sent: $command");
+	}
+	*/
 }
 ?>
