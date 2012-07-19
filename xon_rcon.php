@@ -67,17 +67,30 @@ while (true) {
 							}
 						}
 						break;
+					case "gametype":
+						$action[1] = trim($action[1], "\n");
+						$rcon->send_command("say ^3Changing gametype to: ^2$action[1]");
+						$rcon->send_command("$action[0] $action[1]");
+						$rcon->send_command("restart");
+						break;
 					case "kick":
+						$action[1] = trim($action[1], "\n");
 						$rcon->send_command("$action[0] $action[1]");
 						break;
-					case "status":
-						$rcon->send_command("status");
-						// need to finish
+					case "ban":
+						$action[1] = trim($action[1], "\n");
+						$rcon->send_command("$action[0] $action[1]");
 						break;
 					case "rcon":
 						$action[1] = trim($action[1], "\n");
 						$rcon->send_command("$action[1]");
 						break;
+					/*
+					case "status":
+						$rcon->send_command("status");
+						// need to finish
+						break;
+					*/
 				}
 			}
 		}
