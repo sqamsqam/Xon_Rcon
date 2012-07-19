@@ -2,7 +2,7 @@
 /*
 // Name: Xonotic RCon
 // Created by: Sam Fenton (sqamsqam)
-// Last Edited: 18/07/12
+// Last Edited: 19/07/12
 // Description: Base Script used for starting Xonotic RCon
 //
 // About:
@@ -13,7 +13,7 @@
 // Packet Buffer "\xFF\xFF\xFF\xFF"
 // 
 // To-Do:
-// implement HMAC and CHALENGE authentication.
+// implement TIME and CHALENGE authentication.
 // finish set of rcon commands
 // use printf and sprintf
 // OOP! < semi-complete
@@ -23,10 +23,12 @@
 //
 // Commands:
 // - say
-// - map (only needs part of the map name)
+// - map (only needs part of the map name, also accepts a third optional argument to change the gametype)
+// - gametype (only need part of the gametype)
 // - kick (needs to be worked on)
-// - status (testing command)
+// - ban (needs to be worked on)
 // - rcon (send an rcon command through chat)
+// - restart (restarts current map)
 */
 
 require_once ("inc/functions.php");
@@ -58,7 +60,16 @@ while (true) {
 						$rcon->send_command("$action[0] $action[1]");
 						break;
 					case "map":
-						$action[1] = trim($action[1], " \n");
+						$action[1] = trim($action[1], "\n");
+						$option = explode(' ', $action[1], 2)
+						if (isset($option[1])) {
+							foreach(explode(',', Config::get('gametypes')) as $gametype) {
+								if (preg_match("/^(" . $option[1] . ")/", $gametype) == true) {
+									$rcon->send_command("say ^3Changing gametype to: ^2$gametype");
+									$rcon->send_command("gametype $gametype");
+								}
+							}
+						}
 						foreach (explode(',', Config::get('maps')) as $map) {
 							if (preg_match("/^(" . $action[1] . ")/", $map) == true) {
 								$rcon->send_command("say ^3Changing map to: ^2$map");
@@ -84,6 +95,10 @@ while (true) {
 					case "rcon":
 						$action[1] = trim($action[1], "\n");
 						$rcon->send_command("$action[1]");
+						break;
+					case "restart":
+						$action[1] = trim($action[1], "\n");
+						$rcon->send_command("$action[0]");
 						break;
 					/*
 					case "status":

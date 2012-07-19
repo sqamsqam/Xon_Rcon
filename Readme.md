@@ -30,10 +30,12 @@ Xon_Rcon aims to make server administration easier. Xon_Rcon does this by readin
 
 - say ("!say hi everyone" -> "rcon say hi everyone")
 - map ("!map stor" -> "rcon chmap stormkeep")
+- map ("!map stor ctf" -> "rcon gametype ctf", "rcon chmap stormkeep")
 - gametype ("!gametype ctf" -> "rcon gametype ctf")
 - kick ("!kick player name" -> "rcon kick player name")
 - ban ("!ban player name" -> "rcon ban player name")
 - rcon ("!rcon set g_minstagib 1" -> "rcon set g_minstagib 1")
+- restart ("!restart" -> "rcon restart")
 
 
 ##How to Run

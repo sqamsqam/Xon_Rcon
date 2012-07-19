@@ -2,7 +2,7 @@
 /*
 // Name: Config File
 // Created by: Sam Fenton (sqamsqam)
-// Last Edited: 18/07/12
+// Last Edited: 19/07/12
 // Description: Config settings for the script.
 */
 
@@ -21,4 +21,5 @@ Config::set("rconsecure","0");
 Config::set("timezone",	"Pacific/Auckland");
 Config::set("prefix",	"!");
 Config::set("maps",		"afterslime,dance,g-23,glowplant,leave_em_behind,newtonian-nightmare,nexballarena,red-planet,runningman,space-elevator,stormkeep,techassault,xoylent");
+Config::set("gametypes","dm,tdm,dom,ctf,rune,lms,arena,kh,as,ons,race,nexball");
 ?>
