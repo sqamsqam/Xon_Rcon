@@ -65,12 +65,6 @@ class Commands {
 					case "restart":
 						$rcon->send_command("$action[0]");
 						break;
-					/*
-					case "status":
-						$rcon->send_command("status");
-						// need to finish
-						break;
-					*/
 				}
 			}
 		}

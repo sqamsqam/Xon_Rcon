@@ -15,7 +15,6 @@ Config::set("port",		"9000");
 Config::set("rconip",	"127.0.0.1");
 Config::set("rconport",	"26000");
 Config::set("rconpass",	"rcon_pass");
-Config::set("rconsecure","0");
 
 // General Script Settings
 Config::set("timezone",	"Pacific/Auckland");
